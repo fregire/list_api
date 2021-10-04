@@ -1,0 +1,29 @@
+{% load mptt_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        ul {
+            list-style-type: none;
+        }
+    </style>
+</head>
+<body>
+    {% full_tree_for_model list.ListItem as categories %}
+    {% for list_item,structure in categories|tree_info %}
+        {% if structure.new_level %}
+        <ul><li>
+        {% else %}
+        </li><li>
+        {% endif %}
+            {{ list_item.name }}
+        {% for level in structure.closed_levels %}
+        </li></ul>
+        {% endfor %}
+    {% endfor %}
+</body>
+</html>
