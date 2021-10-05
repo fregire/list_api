@@ -14,9 +14,11 @@ def is_unique(item):
     if not item.parent:
         return True
     for children in item.parent.get_children():
-        if children.name == item.name:
+        if children.name == item.name and children.pk != item.pk:
             return False
-    
+    for ancestor in item.get_ancestors(include_self=True):
+        if ancestor.name == item.name and ancestor.pk != item.pk:
+            return False
     return True
     
 class ItemsView(GenericAPIView):
@@ -30,11 +32,13 @@ class ItemsView(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         item = ListItemSerializer(data=request.data)
-        if not is_unique(item):
-            return Response(data='Имя не уникально в рамках этой ветки')
-            
+
         if item.is_valid():
-            item.save()
+            item = item.save()
+            
+            if not is_unique(item):
+                item.delete()
+                return Response(data='Имя не уникально в рамках этой ветки')
         else:
             return Response(data=item.errors)
 
